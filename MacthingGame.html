@@ -1,0 +1,120 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+<head>
+    <title>Matching Game</title>
+    <style type="text/css">
+        body {
+            background-color: #F4D74E;
+            font-family: Arial;
+        }
+        img {
+            position: absolute;
+        }
+        
+        div {
+            position: absolute;
+            width: 500px;
+            height: 500px
+        }
+        
+        #rightSide {
+            left: 500px;
+            border-left: 1px solid black
+        }
+    </style>
+</head>
+
+<body onload="generateFaces(5)">
+    <h1>Matching Game</h1>
+    <p>Click on the extra smiling face on the left. <strong>Level: <span id="theLevel"></span></strong></p>
+    <div id="leftSide"></div>
+    <div id="rightSide"></div>
+
+    <script type="text/javascript">
+        /* -----------------------------------------------
+        Coursera - FullStack Web Development
+        Hong Kong University of Science and Technology
+        Project: Matching Game - Part4
+        Student: Luiz Felippe Gonçalves (@felippeDev) Brazil
+        ----------------------------------------------- */
+        
+        //global vars
+        var numberOfFaces = 5; //initial number of faces
+        var theLeftSide = document.getElementById("leftSide");
+        var theRightSide = document.getElementById("rightSide");
+        var theBody = document.getElementsByTagName("body")[0];
+            
+        //a simple level logic ;)
+        var currentLevel = 1;
+        var theLevel = document.getElementById("theLevel");
+        theLevel.innerHTML = currentLevel.toString();
+
+        //this fn is responsible for generate random faces on leftSide
+        function generateFaces(numberOfFaces) {
+            //this loop generates a new face (a new DOM element) and append on leftSide    
+            for(i = 1; i <= numberOfFaces; i++) {
+                console.log('numberOfFaces:' + numberOfFaces + 'Creating face:' + i);                
+                var newFace = document.createElement("img");
+                newFace.setAttribute('src', 'http://home.cse.ust.hk/~rossiter/mooc/matching_game/smile.png');
+                newFace.style.top = Math.floor(Math.random() * 400) + 'px';
+                newFace.style.left = Math.floor(Math.random() * 400) + 'px';
+                theLeftSide.appendChild(newFace);
+                
+                //clone node branch from leftSide faces and append to rightSide
+                console.log('cloning...');
+                theRightSide.appendChild(theLeftSide.cloneNode(true));
+                
+                //generating the event for click on leftSide lastchild
+                theLeftSide.lastChild.onclick= function nextLevel(event){
+                    console.log(' ---- user passed the level')
+                    event.stopPropagation();
+                    numberOfFaces += 5; //increase more 5 faces
+                    removeAllFaces(); //removing old faces
+                    currentLevel++;
+                    theLevel.innerHTML = currentLevel.toString();
+                    generateFaces(numberOfFaces); //using a recursive call to re-generate new faces
+                };
+            }
+            
+            //removing the rightSide lastChild
+            console.log(' ---- rightSide lastChild removed');
+            theRightSide.removeChild(theRightSide.lastChild);
+            
+            //if user miss click, the game is over.. all events must be released
+            theBody.onclick = function gameOver() {
+                console.log(' ---- user missed, GAME OVER');
+                
+                alert("Game Over! You reached level: " + currentLevel);
+                theBody.onclick = null; //release theBody events
+                theLeftSide.lastChild.onclick = null; //release the leftSide.lastChild events
+                removeAllFaces(); //removing old faces
+
+                var tryAgain = confirm('Do you want try again?')
+                if(tryAgain) {
+                    console.log(' ---- reset the game');
+                    currentLevel = 1;
+                    theLevel.innerHTML = currentLevel.toString();
+                    numberOfFaces = 5
+                    generateFaces(numberOfFaces); //using a recursive call to re-generate new faces
+                }
+            }; 
+        }
+        
+        //removing old leftSide and rightSide childs
+        function removeAllFaces() {
+            console.log(' ---- removing old faces')
+            while(theLeftSide.firstChild) {
+                theLeftSide.removeChild(theLeftSide.firstChild);
+            }
+
+            while(theRightSide.firstChild) {
+                theRightSide.removeChild(theRightSide.firstChild);
+            }
+        }
+    </script>
+</body>
+
+</html>
